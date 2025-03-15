@@ -18,7 +18,7 @@
    [0 0 0 1 0 0 0]
    [0 1 0 0 0 1 0]
    [0 0 0 1 0 0 0]
-   [0 1 0 1 0 1 0]
+   [0 1 0 0 0 1 0]
    [0 0 0 1 0 0 0]
    [0 1 0 0 0 1 0]
    [0 0 0 1 0 0 0]
@@ -30,7 +30,7 @@
 (def miam-respawn-delay-max 2400)
 
 ;; Délai de déplacement de l'ennemi (en millisecondes)
-(def enemy-move-delay 500)
+(def enemy-move-delay 300)
 
 ;; Couleurs
 (def color-background [50 50 50])

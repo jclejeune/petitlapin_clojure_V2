@@ -12,7 +12,8 @@
          :miam-alive? true
          :game-over? false
          :score 0
-         :hi-score 0}))
+         :hi-score 0
+         :hunting-mode? false}))
 
 (defn reset-game!
   "Réinitialise l'état du jeu"
@@ -65,3 +66,8 @@
   "Ajoute des points au score"
   [points]
   (swap! game-state update :score + points))
+
+(defn set-hunting-mode!
+  "Définit le mode de chasse de l'ennemi (flair ou furtif)."
+  [mode?]
+  (swap! game-state assoc :hunting-mode? mode?))

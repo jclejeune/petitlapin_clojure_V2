@@ -1,6 +1,5 @@
-; src/com/jnchr/my_game/ui.clj
 (ns com.jnchr.my-game.ui
-  "Interface utilisateur"
+  "User Interface"
   (:import [java.awt Color Font]
            [javax.swing JFrame JPanel Timer]
            [java.awt.event KeyListener KeyEvent])
@@ -8,28 +7,32 @@
             [com.jnchr.my-game.state :as state]
             [com.jnchr.my-game.core :as core]))
 
-;; Fonctions d'affichage
+;; Font loading function
+(defn load-font
+  "Loads a font from the resources/fonts directory."
+  [filename size]
+  (let [font-path (str "resources/fonts/" filename)
+        font-stream (java.io.FileInputStream. font-path)
+        base-font (Font/createFont Font/TRUETYPE_FONT font-stream)]
+    (.deriveFont base-font (float size))))
+
+;; Load specific fonts
+(def game-over-font (load-font "OurFriendElectric.otf" 54))
+(def default-font (load-font "SuiGenerisRG.otf" 25))
 
 (defn draw-grid
-  "Dessine la grille et le fond avec une marge noire"
+  "Draws the grid and background with a black margin."
   [g]
   (let [[r g-color b] model/color-background
         [wall-r wall-g wall-b] model/color-wall
-        ;; Calculer les marges pour centrer la grille
         margin-x (/ (- model/zone-width (* model/grid-width model/cell-size)) 2)
         margin-y (/ (- model/zone-height (* model/grid-height model/cell-size)) 2)]
-
-    ;; Fond noir pour toute la zone
     (.setColor g Color/BLACK)
     (.fillRect g 0 0 model/zone-width model/zone-height)
-
-    ;; Zone de jeu avec couleur de fond
     (.setColor g (Color. r g-color b))
     (.fillRect g margin-x margin-y
                (* model/grid-width model/cell-size)
                (* model/grid-height model/cell-size))
-
-    ;; Dessiner les murs
     (.setColor g (Color. wall-r wall-g wall-b))
     (doseq [y (range model/grid-height) x (range model/grid-width)]
       (when (= 1 (get-in model/walls [y x]))
@@ -37,8 +40,6 @@
                    (+ margin-x (* x model/cell-size))
                    (+ margin-y (* y model/cell-size))
                    model/cell-size model/cell-size)))
-
-    ;; Dessiner les lignes de la grille
     (.setColor g Color/BLACK)
     (dotimes [i (inc model/grid-width)]
       (.drawLine g
@@ -54,7 +55,7 @@
                  (+ margin-y (* j model/cell-size))))))
 
 (defn draw-entity
-  "Dessine une entité à la position donnée avec la couleur spécifiée"
+  "Draws an entity at the given position with the specified color."
   [g pos color]
   (let [{:keys [x y]} pos
         margin-x (/ (- model/zone-width (* model/grid-width model/cell-size)) 2)
@@ -66,7 +67,7 @@
                30 30)))
 
 (defn draw-miam
-  "Dessine le miam s'il est visible"
+  "Draws the food item if it's visible."
   [g]
   (let [{:keys [miam miam-alive?]} @state/game-state]
     (when miam-alive?
@@ -76,7 +77,7 @@
         (draw-entity g miam Color/MAGENTA)))))
 
 (defn draw-game-over
-  "Dessine l'écran de fin de partie"
+  "Draws the game over screen."
   [g]
   (let [{:keys [score hi-score]} @state/game-state
         [r g-color b a] model/color-overlay
@@ -85,9 +86,10 @@
         center-y (/ model/zone-height 2)]
     (.setColor g (Color. r g-color b a))
     (.fillRect g 0 0 model/zone-width model/zone-height)
-    (.setFont g (Font. "Arial" Font/BOLD 36))
+    (.setFont g game-over-font)
     (.setColor g Color/RED)
-    (.drawString g "GAME OVER" (- center-x 100) (- center-y 60))
+    (.drawString g "GAME OVER" (- center-x 125) (- center-y 60))
+    (.setFont g default-font)
     (.setColor g (Color. score-r score-g score-b))
     (.drawString g (str "Score: " score) (- center-x 100) center-y)
     (when (>= score hi-score)
@@ -95,7 +97,7 @@
       (.drawString g (str "Hi-Score: " score) (- center-x 100) (+ center-y 60)))))
 
 (defn create-game-panel
-  "Crée le panel du jeu"
+  "Creates the game panel."
   []
   (proxy [JPanel] []
     (paintComponent [g]
@@ -109,7 +111,7 @@
           (draw-game-over g))))))
 
 (defn create-key-listener
-  "Crée un écouteur de clavier"
+  "Creates a keyboard listener."
   [panel]
   (proxy [KeyListener] []
     (keyPressed [e]
@@ -120,7 +122,7 @@
     (keyTyped [e])))
 
 (defn create-game-window
-  "Crée la fenêtre du jeu"
+  "Creates the game window."
   []
   (let [frame (JFrame. "Lapin et Renard")
         panel (create-game-panel)]
@@ -128,22 +130,11 @@
       (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
       (.setResizable false)
       (.add panel))
-
-    ;; Définir la taille préférée du panel
     (.setPreferredSize panel (java.awt.Dimension. 400 600))
-
-    ;; Ajuster la taille de la fenêtre au contenu
     (.pack frame)
-
     (doto panel
       (.setFocusable true)
       (.addKeyListener (create-key-listener panel)))
-
-    ;; Démarrer la boucle de jeu
     (core/game-loop #(.repaint panel))
-
-    ;; Afficher la fenêtre
     (.setVisible frame true)
-
-    ;; Retourner la fenêtre
     frame))

@@ -86,8 +86,42 @@
       (state/set-last-miam-pos! new-pos)
       (state/set-miam! new-pos))))
 
+;; (defn move-enemy
+;;   "Déplace l'ennemi vers le joueur avec un comportement plus naturel"
+;;   []
+;;   (let [state @state/game-state]
+;;     (when-not (:game-over? state)
+;;       (let [{px :x py :y} (:player state)
+;;             {ex :x ey :y} (:enemy state)
+;;             moves [[-1 0] [1 0] [0 -1] [0 1]]
+;;             valid-moves (filter #(can-move? (+ ex (first %)) (+ ey (second %))) moves)
+
+;;             ;; Calcul des distances pour chaque mouvement possible
+;;             moves-with-distances (map (fn [[dx dy]]
+;;                                         {:move [dx dy]
+;;                                          :distance (distance (+ ex dx) (+ ey dy) px py)})
+;;                                       valid-moves)
+
+;;             ;; Trouver la distance minimum
+;;             min-distance (if (seq moves-with-distances)
+;;                            (apply min (map :distance moves-with-distances))
+;;                            Double/MAX_VALUE)
+
+;;             ;; Filtrer les mouvements qui donnent cette distance minimum
+;;             best-moves (filter #(= (:distance %) min-distance) moves-with-distances)
+
+;;             ;; S'il y a plusieurs meilleurs mouvements possibles (équidistance),
+;;             ;; choisir un mouvement au hasard parmi ceux-ci
+;;             selected-move (if (seq best-moves)
+;;                             (:move (rand-nth best-moves))
+;;                             nil)]
+
+;;         (when selected-move
+;;           (state/set-enemy-pos! {:x (+ ex (first selected-move))
+;;                                  :y (+ ey (second selected-move))}))))))
+
 (defn move-enemy
-  "Déplace l'ennemi vers le joueur avec un comportement plus naturel"
+  "Déplace l'ennemi vers le joueur avec un comportement adaptatif"
   []
   (let [state @state/game-state]
     (when-not (:game-over? state)
@@ -110,15 +144,36 @@
             ;; Filtrer les mouvements qui donnent cette distance minimum
             best-moves (filter #(= (:distance %) min-distance) moves-with-distances)
 
-            ;; S'il y a plusieurs meilleurs mouvements possibles (équidistance),
-            ;; choisir un mouvement au hasard parmi ceux-ci
-            selected-move (if (seq best-moves)
-                            (:move (rand-nth best-moves))
-                            nil)]
+            ;; Historique des 5 derniers déplacements
+            last-positions (:last-enemy-positions state)
+            new-history (take 5 (conj last-positions {:x ex :y ey}))
 
+            ;; Vérifier si une position revient trop souvent
+            position-counts (frequencies new-history)
+            stuck-zone? (some #(>= (val %) 3) position-counts) ;; Si une position est apparue 3 fois en 5 tours
+
+            ;; Déterminer le mode de chasse
+            hunting-mode? (and (not stuck-zone?) (= (count best-moves) 1))
+
+            ;; Sélection du mouvement
+            selected-move (if stuck-zone?
+                            ;; Si bloqué dans une zone, mouvement aléatoire
+                            (rand-nth valid-moves)
+                            ;; Sinon, suivre la stratégie habituelle
+                            (:move (first best-moves)))]
+
+        ;; Mise à jour de l'historique
+        (swap! state/game-state assoc :last-enemy-positions new-history)
+
+        ;; Mise à jour du mode hunting
+        (state/set-hunting-mode! hunting-mode?)
+
+        ;; Déplacement de l'ennemi
         (when selected-move
           (state/set-enemy-pos! {:x (+ ex (first selected-move))
                                  :y (+ ey (second selected-move))}))))))
+
+
 
 (defn check-game-over
   "Vérifie si le joueur a été attrapé par l'ennemi"
