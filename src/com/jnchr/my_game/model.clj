@@ -34,11 +34,16 @@
 
 ;; Couleurs
 (def color-background [50 50 50])
-(def color-wall [221 46 68])
+;; Couleurs pour différents types de murs
+(def colors-wall
+  {1 [221 46 68]        ;; Couleur du mur de type 1 (rouge)
+   2 [0 128 255]        ;; Couleur du mur de type 2 (bleu)
+   3 [0 255 0]          ;; Couleur du mur de type 3 (vert)
+   4 [255 255 0]})        ;; Couleur du mur de type 4 (jaune)})
 (def color-overlay [100 100 100 150])
-(def color-player :yellow)
-(def color-enemy :cyan)
-(def color-miam :magenta)
+;; (def color-player :yellow)
+;; (def color-enemy :cyan)
+;; (def color-miam :magenta)
 (def color-score-display [173 216 230])
 
 ;; Positions initiales

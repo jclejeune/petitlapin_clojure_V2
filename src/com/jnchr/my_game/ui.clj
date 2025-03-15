@@ -3,6 +3,7 @@
   (:import [java.awt Color Font]
            [javax.swing JFrame JPanel]
            [java.awt.event KeyListener])
+
   (:require [com.jnchr.my-game.model :as model]
             [com.jnchr.my-game.state :as state]
             [com.jnchr.my-game.core :as core]))
@@ -21,25 +22,33 @@
 (def default-font (load-font "SuiGenerisRG.otf" 25))
 
 (defn draw-grid
-  "Draws the grid and background with a black margin."
+  "Dessine la grille et les murs avec des couleurs spécifiques."
   [g]
   (let [[r g-color b] model/color-background
-        [wall-r wall-g wall-b] model/color-wall
         margin-x (/ (- model/zone-width (* model/grid-width model/cell-size)) 2)
         margin-y (/ (- model/zone-height (* model/grid-height model/cell-size)) 2)]
+
+    ;; Dessine le fond de la grille
     (.setColor g Color/BLACK)
     (.fillRect g 0 0 model/zone-width model/zone-height)
     (.setColor g (Color. r g-color b))
     (.fillRect g margin-x margin-y
                (* model/grid-width model/cell-size)
                (* model/grid-height model/cell-size))
-    (.setColor g (Color. wall-r wall-g wall-b))
-    (doseq [y (range model/grid-height) x (range model/grid-width)]
-      (when (= 1 (get-in model/walls [y x]))
-        (.fillRect g
-                   (+ margin-x (* x model/cell-size))
-                   (+ margin-y (* y model/cell-size))
-                   model/cell-size model/cell-size)))
+
+    ;; Dessine les murs avec la couleur basée sur la valeur du mur
+    (doseq [y (range model/grid-height)
+            x (range model/grid-width)]
+      (let [value (get-in model/walls [y x])]
+        (when (> value 0) ;; Si la case contient un mur (valeur > 0)
+          (let [color (get model/colors-wall value [0 0 0])] ;; Récupère la couleur du mur ou noir si non trouvé
+            (.setColor g (Color. (first color) (second color) (last color))) ;; Applique la couleur correspondante
+            (.fillRect g
+                       (+ margin-x (* x model/cell-size))
+                       (+ margin-y (* y model/cell-size))
+                       model/cell-size model/cell-size)))))
+
+    ;; Dessine les lignes de la grille
     (.setColor g Color/BLACK)
     (dotimes [i (inc model/grid-width)]
       (.drawLine g
@@ -86,9 +95,16 @@
         center-y (/ model/zone-height 2)]
     (.setColor g (Color. r g-color b a))
     (.fillRect g 0 0 model/zone-width model/zone-height)
+
+    ;; Contour noir
     (.setFont g game-over-font)
+    (.setColor g Color/BLACK)
+    (.drawString g "GAME OVER" (- center-x 127) (- center-y 62)) ;; Légèrement décalé pour créer le contour
+
+    ;; Texte rouge
     (.setColor g Color/RED)
     (.drawString g "GAME OVER" (- center-x 125) (- center-y 60))
+
     (.setFont g default-font)
     (.setColor g (Color. score-r score-g score-b))
     (.drawString g (str "Score: " score) (- center-x 100) center-y)
