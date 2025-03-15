@@ -124,7 +124,7 @@
 (defn create-game-window
   "Creates the game window."
   []
-  (let [frame (JFrame. "Lapin et Renard")
+  (let [frame (JFrame. "petitLapin V2")
         panel (create-game-panel)]
     (doto frame
       (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)

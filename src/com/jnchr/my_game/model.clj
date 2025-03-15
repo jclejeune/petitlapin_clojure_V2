@@ -30,7 +30,7 @@
 (def miam-respawn-delay-max 2400)
 
 ;; Délai de déplacement de l'ennemi (en millisecondes)
-(def enemy-move-delay 300)
+(def enemy-move-delay 1000)
 
 ;; Couleurs
 (def color-background [50 50 50])
