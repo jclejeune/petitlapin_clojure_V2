@@ -41,16 +41,53 @@
                      (not= {:x x :y y} enemy))]
       {:x x :y y})))
 
+;; (defn spawn-miam
+;;   "Génère une position aléatoire pour le miam"
+;;   []
+;;   (let [empty-positions (get-empty-positions)
+;;         new-pos (when (seq empty-positions) (rand-nth empty-positions))]
+;;     (when new-pos
+;;       (state/set-miam! new-pos))))
+
 (defn spawn-miam
-  "Génère une position aléatoire pour le miam"
+  "Génère une position aléatoire pour le miam à une distance minimale de 3 cases du joueur
+   et différente de la dernière position"
   []
-  (let [empty-positions (get-empty-positions)
-        new-pos (when (seq empty-positions) (rand-nth empty-positions))]
+  (let [state @state/game-state
+        player (:player state)
+        last-miam-pos (:last-miam-pos state)  ; Récupère la dernière position du miam
+        ;; Récupère toutes les positions vides
+        all-empty-positions (get-empty-positions)
+        ;; Filtre pour ne garder que les positions assez éloignées du joueur
+        distant-positions (filter
+                           (fn [{x :x y :y}]
+                             (let [px (:x player)
+                                   py (:y player)
+                                    ;; Distance de Manhattan (plus appropriée pour un mouvement en grille)
+                                   manhattan-dist (+ (Math/abs (- x px)) (Math/abs (- y py)))]
+                               (>= manhattan-dist 3)))
+                           all-empty-positions)
+        ;; Filtre pour exclure la dernière position du miam (si elle existe)
+        filtered-positions (if last-miam-pos
+                             (filter #(not= % last-miam-pos) distant-positions)
+                             distant-positions)
+        ;; Si aucune position ne respecte les contraintes, on revient aux positions distantes,
+        ;; puis à toutes les positions vides si nécessaire
+        usable-positions (cond
+                           (seq filtered-positions) filtered-positions
+                           (seq distant-positions) distant-positions
+                           :else all-empty-positions)
+        ;; Sélectionne une position aléatoire parmi celles disponibles
+        new-pos (when (seq usable-positions) (rand-nth usable-positions))]
+
+    ;; Place le miam à la nouvelle position s'il y en a une
     (when new-pos
+      ;; Sauvegarde la nouvelle position comme dernière position connue
+      (state/set-last-miam-pos! new-pos)
       (state/set-miam! new-pos))))
 
 (defn move-enemy
-  "Déplace l'ennemi vers le joueur en utilisant la stratégie du plus court chemin"
+  "Déplace l'ennemi vers le joueur avec un comportement plus naturel"
   []
   (let [state @state/game-state]
     (when-not (:game-over? state)
@@ -58,12 +95,30 @@
             {ex :x ey :y} (:enemy state)
             moves [[-1 0] [1 0] [0 -1] [0 1]]
             valid-moves (filter #(can-move? (+ ex (first %)) (+ ey (second %))) moves)
-            best-move (apply min-key (fn [[dx dy]]
-                                       (distance (+ ex dx) (+ ey dy) px py))
-                             valid-moves)]
-        (when best-move
-          (state/set-enemy-pos! {:x (+ ex (first best-move))
-                                 :y (+ ey (second best-move))}))))))
+
+            ;; Calcul des distances pour chaque mouvement possible
+            moves-with-distances (map (fn [[dx dy]]
+                                        {:move [dx dy]
+                                         :distance (distance (+ ex dx) (+ ey dy) px py)})
+                                      valid-moves)
+
+            ;; Trouver la distance minimum
+            min-distance (if (seq moves-with-distances)
+                           (apply min (map :distance moves-with-distances))
+                           Double/MAX_VALUE)
+
+            ;; Filtrer les mouvements qui donnent cette distance minimum
+            best-moves (filter #(= (:distance %) min-distance) moves-with-distances)
+
+            ;; S'il y a plusieurs meilleurs mouvements possibles (équidistance),
+            ;; choisir un mouvement au hasard parmi ceux-ci
+            selected-move (if (seq best-moves)
+                            (:move (rand-nth best-moves))
+                            nil)]
+
+        (when selected-move
+          (state/set-enemy-pos! {:x (+ ex (first selected-move))
+                                 :y (+ ey (second selected-move))}))))))
 
 (defn check-game-over
   "Vérifie si le joueur a été attrapé par l'ennemi"
@@ -78,6 +133,9 @@
   (let [{:keys [player miam miam-alive?]} @state/game-state]
     (when (and miam-alive? miam (= player miam))
       (state/update-score! 50)
+      ;; On sauvegarde d'abord la position actuelle comme dernière position connue
+      (state/set-last-miam-pos! miam)
+      ;; Puis on réinitialise la position actuelle
       (state/set-miam! nil)
       (state/toggle-miam-alive! false)
       true)))

@@ -8,20 +8,20 @@
   (atom {:player {:x 3 :y 10}
          :enemy {:x 3 :y 0}
          :miam nil
+         :last-miam-pos nil  ; Nouvelle clé pour stocker la dernière position
          :miam-alive? true
          :game-over? false
          :score 0
          :hi-score 0}))
 
-;; Fonctions de mise à jour de l'état
-
-(defn reset-game! 
+(defn reset-game!
   "Réinitialise l'état du jeu"
   []
   (swap! game-state assoc
          :player model/initial-player-pos
          :enemy model/initial-enemy-pos
          :miam nil
+         :last-miam-pos nil  ; Réinitialisation de la dernière position connue
          :miam-alive? true
          :game-over? false
          :score 0))
@@ -45,6 +45,12 @@
   "Alterne l'état d'apparition du miam"
   [alive?]
   (swap! game-state assoc :miam-alive? alive?))
+
+
+(defn set-last-miam-pos! 
+  "Définit la dernière position connue du miam"
+  [pos]
+  (swap! game-state assoc :last-miam-pos pos))
 
 (defn game-over! 
   "Marque la partie comme terminée et met à jour le hi-score si nécessaire"

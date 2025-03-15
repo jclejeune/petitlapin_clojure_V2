@@ -89,10 +89,10 @@
     (.setColor g Color/RED)
     (.drawString g "GAME OVER" (- center-x 100) (- center-y 60))
     (.setColor g (Color. score-r score-g score-b))
-    (.drawString g (str "Score: " score) (- center-x 80) center-y)
+    (.drawString g (str "Score: " score) (- center-x 100) center-y)
     (when (>= score hi-score)
       (.setColor g Color/YELLOW)
-      (.drawString g (str "Hi-Score: " score) (- center-x 80) (+ center-y 60)))))
+      (.drawString g (str "Hi-Score: " score) (- center-x 100) (+ center-y 60)))))
 
 (defn create-game-panel
   "Crée le panel du jeu"
