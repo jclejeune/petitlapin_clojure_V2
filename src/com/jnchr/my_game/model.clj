@@ -30,7 +30,7 @@
 (def miam-respawn-delay-max 2400)
 
 ;; Délai de déplacement de l'ennemi (en millisecondes)
-(def enemy-move-delay 1000)
+(def enemy-move-delay 300)
 
 ;; Couleurs
 (def color-background [50 50 50])
@@ -44,3 +44,7 @@
 ;; Positions initiales
 (def initial-player-pos {:x 3 :y 10})
 (def initial-enemy-pos {:x 3 :y 0})
+
+;; Score et hi-score
+(def initial-score 0)
+(def initial-hi-score 0)

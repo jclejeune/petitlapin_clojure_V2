@@ -6,5 +6,5 @@
 
 (defn -main
   "Point d'entrée principal du jeu"
-  [& args]
+  [& _]
   (ui/create-game-window))

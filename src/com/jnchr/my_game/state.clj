@@ -10,9 +10,9 @@
          :miam nil
          :last-miam-pos nil  ; Nouvelle clé pour stocker la dernière position
          :miam-alive? true
-         :game-over? false
-         :score 0
-         :hi-score 0
+         :game-over? false 
+         :score model/initial-score
+         :hi-score model/initial-hi-score
          :hunting-mode? false}))
 
 (defn reset-game!

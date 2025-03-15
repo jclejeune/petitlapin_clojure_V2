@@ -1,8 +1,8 @@
 (ns com.jnchr.my-game.ui
   "User Interface"
   (:import [java.awt Color Font]
-           [javax.swing JFrame JPanel Timer]
-           [java.awt.event KeyListener KeyEvent])
+           [javax.swing JFrame JPanel]
+           [java.awt.event KeyListener])
   (:require [com.jnchr.my-game.model :as model]
             [com.jnchr.my-game.state :as state]
             [com.jnchr.my-game.core :as core]))
