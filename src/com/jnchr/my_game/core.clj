@@ -83,7 +83,6 @@
       (state/set-last-miam-pos! selected-position)
       (state/set-miam! selected-position))))
 
-
 (defn respawn-miam-after-delay
   "Fait réapparaître un miam après un délai aléatoire"
   []
@@ -108,8 +107,6 @@
           (when (check-for-miam)
             (respawn-miam-after-delay))
           true)))))
-
-
 
 (defn move-enemy
   "Déplace l'ennemi vers le joueur avec un comportement adaptatif avancé"

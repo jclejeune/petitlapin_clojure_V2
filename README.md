@@ -1,22 +1,39 @@
-# my-game
+# PetitLapin V2
 
-A Clojure library designed to ... well, that part is up to you.
+Un jeu de labyrinthe où vous contrôlez un lapin qui doit collecter des "miams" tout en évitant un renard qui le poursuit.
 
-## Usage
+## Règles du jeu
 
-FIXME
+- Déplacez le lapin (jaune) avec les flèches directionnelles
+- Collectez les miams (magenta) pour gagner 50 points
+- Évitez le renard (cyan) qui vous pourchasse
+- La partie se termine quand le renard attrape le lapin
 
-## License
+## Installation
 
-Copyright © 2025 FIXME
+1. Assurez-vous que Java et Leiningen sont installés sur votre système
+2. Clonez ce dépôt : `git clone https://github.com/votre-nom/my-game.git`
+3. Placez les polices nécessaires dans le dossier `resources/fonts/`
+   - OurFriendElectric.otf : `https://www.dafont.com/fr/our-friend-electric.font`
+   - SuiGenerisRG.otf : `https://www.dafont.com/fr/sui-generis.font`
+4. Lancer l'installation'
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
+```bash
+        lein install
+```
 
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+## Lancement du jeu
+
+```bash
+        lein run
+```
+
+## Contrôles
+
+- Déplacement : arrow_up: :arrow_down: :arrow_left: :arrow_right:
+- Rejouer apres Game Over:  [ Espace ]
+
+## Licence
+
+Copyright © 2025 JNCHR
+Ce programme est distribué sous les termes de la licence Eclipse Public License 2.0.
