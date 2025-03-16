@@ -30,7 +30,7 @@ Un jeu de labyrinthe où vous contrôlez un lapin qui doit collecter des "miams"
 
 ## Contrôles
 
-- Déplacement : arrow_up: :arrow_down: :arrow_left: :arrow_right:
+- Déplacement :arrow_up: :arrow_down: :arrow_left: :arrow_right:
 - Rejouer apres Game Over:  [ Espace ]
 
 ## Licence
