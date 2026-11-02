@@ -1,12 +1,13 @@
 (ns com.jnchr.my-game.ui
   "User Interface"
   (:import [java.awt Color Font]
+           [java.awt.event KeyListener]
            [javax.swing JFrame JPanel]
-           [java.awt.event KeyListener])
-
+           [javax.imageio ImageIO])
   (:require [com.jnchr.my-game.model :as model]
             [com.jnchr.my-game.state :as state]
-            [com.jnchr.my-game.core :as core]))
+            [com.jnchr.my-game.core :as core]
+            [clojure.java.io :as io]))
 
 ;; Font loading function
 (defn load-font
@@ -19,7 +20,17 @@
 
 ;; Load specific fonts
 (def game-over-font (load-font "OurFriendElectric.otf" 54))
-(def default-font (load-font "SuiGenerisRG.otf" 25))
+(def default-font (load-font "SuiGenerisRg.otf" 25))
+
+;; Sprite loading function and assets
+(defn load-sprite
+  "Loads an image sprite from resources/images directory."
+  [filename]
+  (ImageIO/read (io/resource (str "images/" filename))))
+
+(def rabbit-img (load-sprite "rabbit.png"))
+(def fox-img    (load-sprite "fox.png"))
+(def carrot-img (load-sprite "carrot.png"))
 
 (defn draw-grid
   "Dessine la grille et les murs avec des couleurs spécifiques."
@@ -63,17 +74,15 @@
                  (+ margin-x (* model/grid-width model/cell-size))
                  (+ margin-y (* j model/cell-size))))))
 
-(defn draw-entity
-  "Draws an entity at the given position with the specified color."
-  [g pos color]
+(defn draw-sprite
+  "Dessine une image (sprite) à la position (x, y) de la grille."
+  [g pos img]
   (let [{:keys [x y]} pos
         margin-x (/ (- model/zone-width (* model/grid-width model/cell-size)) 2)
-        margin-y (/ (- model/zone-height (* model/grid-height model/cell-size)) 2)]
-    (.setColor g color)
-    (.fillOval g
-               (+ margin-x (* x model/cell-size) 10)
-               (+ margin-y (* y model/cell-size) 10)
-               30 30)))
+        margin-y (/ (- model/zone-height (* model/grid-height model/cell-size)) 2)
+        px (+ margin-x (* x model/cell-size))
+        py (+ margin-y (* y model/cell-size))]
+    (.drawImage g img px py model/cell-size model/cell-size nil)))
 
 (defn draw-miam
   "Draws the food item if it's visible."
@@ -83,7 +92,7 @@
       (when (nil? miam)
         (core/spawn-miam))
       (when miam
-        (draw-entity g miam Color/MAGENTA)))))
+        (draw-sprite g miam carrot-img)))))
 
 (defn draw-game-over
   "Draws the game over screen."
@@ -121,8 +130,8 @@
       (draw-grid g)
       (draw-miam g)
       (let [{:keys [player enemy game-over?]} @state/game-state]
-        (draw-entity g player Color/YELLOW)
-        (draw-entity g enemy Color/CYAN)
+        (draw-sprite g player rabbit-img)
+        (draw-sprite g enemy fox-img)
         (when game-over?
           (draw-game-over g))))))
 
